@@ -11,33 +11,42 @@ spec:
         sidecar.istio.io/inject: "false"
     spec:
       containers:
-      - name: kaniko
-        image: gcr.io/kaniko-project/executor:latest
-        args:
-        - "--context=git://{{ challenge_repo }}"
-        - "--destination=challenge-registry-service.{{ registry_namespace }}/{{ challenge_name }}:latest"
-        - "--insecure"
-        env:
-        - name: GIT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: registry-auth-map
-              key: git-password
-        - name: GIT_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: registry-auth-map
-              key: git-username
+      - name: debug
+        image: alpine:latest
+        command: ["sh", "-c", "sleep 3600"]
         volumeMounts:
         - name: kaniko-secret
           mountPath: /kaniko/.docker
+        - name: git-ssh
+          mountPath: /kaniko/.ssh
+        - name: workspace
+          mountPath: /workspace
+      - name: kaniko
+        image: gcr.io/kaniko-project/executor:latest
+        args:
+          - --context=git@{{ challenge_repo }}
+          - --dockerfile=Dockerfile
+          - --destination=challenge-registry-service.{{ registry_namespace }}/{{ challenge_name }}:latest
+          - "--verbosity=debug"
+          - --insecure
+        volumeMounts:
+        - name: kaniko-secret
+          mountPath: /kaniko/.docker
+        - name: git-ssh
+          mountPath: /kaniko/.ssh
+          readOnly: true
       volumes:
+        - name: workspace
+          emptyDir: {}
         - name: kaniko-secret
           secret:
             secretName: registry-auth-map
             items:
               - key: .dockerconfigjson
                 path: config.json
+        - name: git-ssh
+          secret:
+            secretName: git-ssh-key
       restartPolicy: Never
 ---
 apiVersion: v1
@@ -47,5 +56,3 @@ metadata:
   namespace: {{ registry_namespace }}
 data:
   .dockerconfigjson: {{ registry_data }}
-  git-username: {{ git_user }}
-  git-password: {{ git_credential }}

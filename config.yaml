@@ -1,7 +1,7 @@
-git_username: user
-git_credential: env
+git_username: git
+git_credential: /kaniko/.ssh/id_rsa
 registry_password: env
-registry_namespace: registry
+registry_namespace: container-registry
 challenge_namespace: challenges
 istio_namespace: istio-system
 tcp_domain_name: chal.example.com
