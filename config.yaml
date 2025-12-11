@@ -1,14 +1,14 @@
-git_username: git
-git_credential: /kaniko/.ssh/id_rsa
+#git_username:
+#git_credential:
 registry_password: env
 registry_namespace: container-registry
 challenge_namespace: challenges
 istio_namespace: istio-system
-tcp_domain_name: chal.example.com
-https_domain_name: web.example.com
+tcp_domain_name: localhost
+https_domain_name: localhost
 certificate_issuer_name: istio-issuer
 istio_ingress_name: ingressgateway
 external_tcp_port: 443
 external_https_port: 443
 expire_interval: 3600
-ctfd_url: http://ctfd-service.ctfd
+ctfd_url: http://192.168.2.24:8000
